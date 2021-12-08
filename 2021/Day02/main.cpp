@@ -3,7 +3,9 @@
 #include <vector>
 #include <utility>
 
-void solve_a(const std::vector<std::pair<char, int>>& commands) {
+using namespace std;
+
+void SolveA(const vector<pair<char, int>>& commands) {
     int horizontal = 0;
     int depth = 0;
 
@@ -26,10 +28,10 @@ void solve_a(const std::vector<std::pair<char, int>>& commands) {
         }
     }
     
-    std::cout << "Product of final horizontal and depth position: " << horizontal * depth << std::endl;
+    cout << "Product of final horizontal and depth position: " << horizontal * depth << endl;
 }
 
-void solve_b(const std::vector<std::pair<char, int>>& commands) {
+void SolveB(const vector<pair<char, int>>& commands) {
     int horizontal = 0;
     int depth = 0;
     int aim = 0;
@@ -54,39 +56,39 @@ void solve_b(const std::vector<std::pair<char, int>>& commands) {
         }
     }
     
-    std::cout << "Product of AMMENDED final horizontal and depth position: " << horizontal * depth << std::endl;
+    cout << "Product of AMMENDED final horizontal and depth position: " << horizontal * depth << endl;
 }
 
 int main() {
-    std::ifstream input_file("input.txt");
+    ifstream input_file("input.txt");
 
-    std::vector<std::pair<char, int>> res;
+    vector<pair<char, int>> res;
 
-    std::string line;
-    while (std::getline(input_file, line)) {
-        std::size_t pos = line.find("forward");
+    string line;
+    while (getline(input_file, line)) {
+        size_t pos = line.find("forward");
         int magnitude = 0;
 
-        if (pos != std::string::npos) {
-            magnitude = std::stoi(line.substr(8));
-            res.push_back(std::make_pair('f', magnitude));
+        if (pos != string::npos) {
+            magnitude = stoi(line.substr(8));
+            res.push_back(make_pair('f', magnitude));
         }
 
         pos = line.find("down");
-        if (pos != std::string::npos) {
-            magnitude = std::stoi(line.substr(5));
-            res.push_back(std::make_pair('d', magnitude));
+        if (pos != string::npos) {
+            magnitude = stoi(line.substr(5));
+            res.push_back(make_pair('d', magnitude));
         }
 
         pos = line.find("up");
-        if (pos != std::string::npos) {
-            magnitude = std::stoi(line.substr(3));
-            res.push_back(std::make_pair('u', magnitude));
+        if (pos != string::npos) {
+            magnitude = stoi(line.substr(3));
+            res.push_back(make_pair('u', magnitude));
         }
     }
 
-    solve_a(res);
-    solve_b(res);
+    SolveA(res);
+    SolveB(res);
     
     return 0;
 }
