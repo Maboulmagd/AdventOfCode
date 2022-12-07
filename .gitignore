@@ -1,15 +1,17 @@
-# Blacklist everything
-*
+/cmake-build-debug/
+/.idea/
+/out/
+/build/
 
-# Whitelist each and every directory
-!*/
+# Ignore all .vs files
+*.vs
+*.vscode
 
-# Whitelist all files with the following extensions
-!*.cpp
-!*.hs
-!*.py
-!*.txt
+# Ignore the out directory
+*.out
 
-# Whitelist .gitignore and README.md files
-!*.gitignore
-!*.md
+# Ignore all image files with png file extension
+*.png
+
+# Ignore macOS files
+*.DS_Store
