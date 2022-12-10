@@ -27,7 +27,7 @@ constexpr int FollowStrategyGuide(const std::vector<std::pair<char,char>>& strat
 }
 
 int main() {
-    std::fstream input_file("2022\\Day02\\input.txt");
+    std::fstream input_file("input.txt");
 
     std::vector<std::pair<char, char>> input;
 
