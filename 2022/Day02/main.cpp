@@ -26,6 +26,30 @@ constexpr int FollowStrategyGuide(const std::vector<std::pair<char,char>>& strat
     return std::reduce(scores.begin(), scores.end());
 }
 
+constexpr int FollowChoiceGuide(const std::vector<std::pair<char,char>>& strategy_guide) {
+    const auto score = [](const auto& pair){
+        const int elf = pair.first - 'A';// 'A' means rock, 'B' means paper, 'C' means scissors
+        const int my_turn = pair.second - 'X';// 'X' means lose, 'Y' means draw, 'Z' means win
+
+        int my_score = my_turn * 3;
+
+        if (my_turn == 1) {// Draw, choose same as elf
+            my_score += elf + 1;
+        }
+        else if (my_turn == 2) {// Win, choose better than elf
+            my_score += ((elf + 1) % 3) + 1;
+        }
+        else {// Lose, choose worse than elf
+            my_score += ((elf - 1 + 3) % 3) + 1;
+        }
+
+        return my_score;
+    };
+
+    const auto scores = strategy_guide | std::views::transform(score) | std::views::common;
+    return std::reduce(scores.begin(), scores.end());
+}
+
 int main() {
     std::fstream input_file("input.txt");
 
@@ -42,6 +66,7 @@ int main() {
     }
 
     std::cout << FollowStrategyGuide(input) << std::endl;
+    std::cout << FollowChoiceGuide(input) << std::endl;
 
     return 0;
 }
