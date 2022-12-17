@@ -33,6 +33,11 @@ constexpr int32_t NumberOfPairsFullyContained(const std::vector<std::pair<Interv
     });
 }
 
+constexpr int32_t NumberOfPairsOverlapping(const std::vector<std::pair<Interval,Interval>>& interval_pairs) {
+    return std::ranges::count_if(interval_pairs, [](const std::pair<Interval,Interval>& interval_pair) {
+       return interval_pair.first.Overlaps(interval_pair.second) || interval_pair.second.Overlaps(interval_pair.first);
+    });
+}
 
 int main() {
 
@@ -54,6 +59,7 @@ int main() {
     }
 
     std::cout << NumberOfPairsFullyContained(input) << std::endl;
+    std::cout << NumberOfPairsOverlapping(input) << std::endl;
 
     return 0;
 }
