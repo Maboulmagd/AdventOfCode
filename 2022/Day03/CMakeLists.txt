@@ -1,3 +1,3 @@
-project(Day03)
+project(2022_Day03)
 
-add_executable(Day03 main.cpp)
+add_executable(2022_Day03 main.cpp)
