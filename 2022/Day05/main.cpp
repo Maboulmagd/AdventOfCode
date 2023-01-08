@@ -59,14 +59,16 @@ std::vector<std::vector<char>> ParseStackArrangements(std::fstream& input_file) 
 }
 
 std::string CrateMover9000(std::vector<std::vector<char>>& stacks, const std::vector<Procedure>& procedures) {
-    std::string stacks_top;
     for (const auto& procedure : procedures) {
-        for (int i = 0; i < procedure.num_crates; ++i) {
-            stacks[procedure.to_stack].push_back(stacks[procedure.from_stack].back());
-            stacks[procedure.from_stack].pop_back();
-        }
+        // view of the procedure's number of crates in reverse order
+        const auto src = stacks[procedure.from_stack] | std::views::reverse | std::views::take(procedure.num_crates);
+        std::ranges::copy(src, std::back_inserter(stacks[procedure.to_stack]));
+
+        // Remove number of crates from procedure
+        stacks[procedure.from_stack].resize(stacks[procedure.from_stack].size() - procedure.num_crates);
     }
 
+    std::string stacks_top;
     for (const auto& stack : stacks) {
         if (!stack.empty()) {
             stacks_top += stack.back();
@@ -77,20 +79,17 @@ std::string CrateMover9000(std::vector<std::vector<char>>& stacks, const std::ve
 }
 
 std::string CrateMover9001(std::vector<std::vector<char>>& stacks, const std::vector<Procedure>& procedures) {
-    std::string stacks_top;
     for (const auto& procedure : procedures) {
-        std::stack<char> intermediary_stack;
-        for (int i = 0; i < procedure.num_crates; ++i) {
-            intermediary_stack.push(stacks[procedure.from_stack].back());
-            stacks[procedure.from_stack].pop_back();
-        }
+        // view of the procedure's number of crates in reverse order
+        const auto src = stacks[procedure.from_stack] | std::views::reverse
+                | std::views::take(procedure.num_crates) | std::views::reverse;// Same as above, but need to reverse num crates selected
+        std::ranges::copy(src, std::back_inserter(stacks[procedure.to_stack]));
 
-        while (!intermediary_stack.empty()) {
-            stacks[procedure.to_stack].push_back(intermediary_stack.top());
-            intermediary_stack.pop();
-        }
+        // Remove number of crates from procedure
+        stacks[procedure.from_stack].resize(stacks[procedure.from_stack].size() - procedure.num_crates);
     }
 
+    std::string stacks_top;
     for (const auto& stack : stacks) {
         if (!stack.empty()) {
             stacks_top += stack.back();
@@ -110,7 +109,7 @@ int ParseAndRun(const std::string path) {
 
     std::vector<std::vector<char>> stacks = ParseStackArrangements(input_file);
 
-    std::vector<std::vector<char>> stacks_copy = stacks;// Need a copy for part 2
+    std::vector<std::vector<char>> stacks_copy = stacks;// Need a copy for part 2, since we modify stacks in-place
 
     // Parse the rearrangement procedures
     std::vector<Procedure> procedures;
