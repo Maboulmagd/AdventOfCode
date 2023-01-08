@@ -53,35 +53,80 @@ std::vector<std::vector<char>> ParseStackArrangements(std::fstream& input_file) 
     }
 
     assert(stacks[0].empty());
-    //std::ranges::for_each(stacks, std::ranges::reverse);// Reverse stacks to represent true arrangement
+    std::ranges::for_each(stacks, std::ranges::reverse);// Reverse stacks to represent true arrangement
 
     return stacks;
 }
 
-std::string MoveCrates(std::vector<std::vector<char>>& stacks, const std::vector<Procedure>& procedures) {
+std::string CrateMover9000(std::vector<std::vector<char>>& stacks, const std::vector<Procedure>& procedures) {
+    std::string stacks_top;
+    for (const auto& procedure : procedures) {
+        for (int i = 0; i < procedure.num_crates; ++i) {
+            stacks[procedure.to_stack].push_back(stacks[procedure.from_stack].back());
+            stacks[procedure.from_stack].pop_back();
+        }
+    }
 
-    return std::to_string(stacks.size()) + " " + std::to_string(procedures.size());
+    for (const auto& stack : stacks) {
+        if (!stack.empty()) {
+            stacks_top += stack.back();
+        }
+    }
+
+    return stacks_top;
 }
 
-int main() {
-    std::fstream input_file("input.txt");
+std::string CrateMover9001(std::vector<std::vector<char>>& stacks, const std::vector<Procedure>& procedures) {
+    std::string stacks_top;
+    for (const auto& procedure : procedures) {
+        std::stack<char> intermediary_stack;
+        for (int i = 0; i < procedure.num_crates; ++i) {
+            intermediary_stack.push(stacks[procedure.from_stack].back());
+            stacks[procedure.from_stack].pop_back();
+        }
+
+        while (!intermediary_stack.empty()) {
+            stacks[procedure.to_stack].push_back(intermediary_stack.top());
+            intermediary_stack.pop();
+        }
+    }
+
+    for (const auto& stack : stacks) {
+        if (!stack.empty()) {
+            stacks_top += stack.back();
+        }
+    }
+
+    return stacks_top;
+}
+
+int ParseAndRun(const std::string path) {
+    std::fstream input_file(path);
 
     if (!input_file.is_open()) {
-        //std::cerr << "Failed to open " << std::quoted(input_file) << "\n";
+        std::cerr << "Failed to open " << std::quoted(path) << "\n";
         return 1;
     }
 
     std::vector<std::vector<char>> stacks = ParseStackArrangements(input_file);
 
-    std::vector<std::vector<char>> stacks_copy = stacks;// Need a copy for part 2x
+    std::vector<std::vector<char>> stacks_copy = stacks;// Need a copy for part 2
 
     // Parse the rearrangement procedures
     std::vector<Procedure> procedures;
 
-    //std::ranges::copy(std::views::istream<Procedure>(input_file), std::back_inserter(procedures));
+    std::ranges::copy(std::views::istream<Procedure>(input_file), std::back_inserter(procedures));
 
-    std::cout << MoveCrates(stacks, procedures) << std::endl;
-    //std::cout <<
+    std::cout << CrateMover9000(stacks, procedures) << std::endl;
+    std::cout << CrateMover9001(stacks_copy, procedures) << std::endl;
 
     return 0;
+}
+
+int main(int argc, char** argv) {
+    if (argc == 1) {
+        return 1;
+    }
+
+    return ParseAndRun(argv[1]);
 }
