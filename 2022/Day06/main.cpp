@@ -19,26 +19,21 @@
     for (; j < data_len; ++j) {
         char_freq[data_stream[j]]++;// Increment count/frequency
 
-        if (j >= marker) {
-            // Check if our range from i to j has unique characters (count is 1)
-            bool has_unique = true;
-            for (std::size_t m = i; m < j+1; ++m) {
-                if (char_freq[data_stream[m]] != 1) {
-                    has_unique = false;
-                    break;
-                }
-            }
-
-            if (has_unique) {
+        if (j+1 >= marker) {
+            if (char_freq.size() == marker) {
                 break;
             }
 
             char_freq[data_stream[i]]--;// Decrement count/frequency of character leaving window
+            if (char_freq[data_stream[i]] == 0) {// Remove character from our map, to reduce size
+                char_freq.erase(data_stream[i]);
+            }
+
             ++i;
         }
     }
 
-    return j;
+    return j+1;
 }
 
 int ParseAndRun(const std::string& path) {
