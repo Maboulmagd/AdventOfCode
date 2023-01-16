@@ -8,6 +8,7 @@
 #include <cassert>
 #include <ranges>
 #include <numeric>
+#include <algorithm>
 
 struct File {
     std::string name_;
@@ -157,7 +158,6 @@ std::istream& operator>>(std::istream& s, Directory* curr_dir) {
 
 FileSystem* ParseOutput(std::istream& s) {
     FileSystem* fs = new FileSystem();
-    //std::skipws(s);// Skip trailing whitespace (if any)
 
     while (s.peek() == '$') {
         char c;
@@ -192,11 +192,28 @@ std::size_t TraverseAndSum(Directory* directory) {
     std::size_t sum = std::reduce(directory_recursive_size.begin(), directory_recursive_size.end());
 
     // If this directory has a recursive size less than our size_offset, add it to sum
-    if (directory->GetRecursiveSize() <= 100000) {// TODO If I want to use above, I can't make this a (default) argument to TraverseAndSum, or can I?
+    if (directory->GetRecursiveSize() <= 100'000) {// TODO If I want to use above, I can't make this a (default) argument to TraverseAndSum, or can I?
         sum += directory->GetRecursiveSize();// Never computing twice, recall we cache recursive size
     }
 
     return sum;
+}
+
+std::size_t SmallestLargeEnoughDirectoryToDelete(FileSystem* file_system, const std::size_t space_to_free) {
+    assert(file_system != nullptr);
+
+    std::vector<std::size_t> directories_sorted_by_size;
+    directories_sorted_by_size.resize(file_system->directories_.size() + 1);
+
+    directories_sorted_by_size.push_back(file_system->root_dir_->GetRecursiveSize());
+
+    for (Directory* dir : file_system->directories_) {
+        directories_sorted_by_size.push_back(dir->GetRecursiveSize());
+    }
+
+    std::sort(directories_sorted_by_size.begin(), directories_sorted_by_size.end());
+
+    return *std::lower_bound(directories_sorted_by_size.cbegin(), directories_sorted_by_size.cend(), space_to_free);
 }
 
 int ParseAndRun(const std::string& path) {
@@ -211,6 +228,18 @@ int ParseAndRun(const std::string& path) {
 
     std::cout << TraverseAndSum(fs->root_dir_) << std::endl;
 
+    const std::size_t size_required_for_update = 30'000'000;
+    const std::size_t used_space = fs->root_dir_->GetRecursiveSize();
+    const std::size_t unused_space = 70'000'000 - used_space;
+
+    if (unused_space >= size_required_for_update) {// Don't need to delete any directory
+        std::cout << 0 << std::endl;
+    }
+    else {
+        assert(unused_space < size_required_for_update);
+        const std::size_t space_to_free = size_required_for_update - unused_space;
+        std::cout << SmallestLargeEnoughDirectoryToDelete(fs, space_to_free) << std::endl;
+    }
 
     delete fs;// Delete our file system, could use smart pointers to avoid this crap
 
@@ -241,13 +270,17 @@ $ ls
 8033020 d.log
 5626152 d.ext
 7214296 k)");
+
+    // Part one
     FileSystem* file_system = ParseOutput(s);
-    assert(TraverseAndSum(file_system->root_dir_) == 95437);
-//  std::size_t used = file_system->root_dir_->GetRecursiveSize();
-//    if (70000000 - used < 30000000) {
-//        std::size_t goal = 30000000 - (70000000 - used);
-//        assert(find_smallest_but_sufficient(&tree->root, goal) == 24933642);
-//    }
+    assert(TraverseAndSum(file_system->root_dir_) == 95'437);
+
+    // Part two
+    const std::size_t used = file_system->root_dir_->GetRecursiveSize();
+    if (70000000 - used < 30000000) {
+        const std::size_t goal = 30000000 - (70000000 - used);
+        assert(SmallestLargeEnoughDirectoryToDelete(file_system, goal) == 24933642);
+    }
 
     return 0;
 }
