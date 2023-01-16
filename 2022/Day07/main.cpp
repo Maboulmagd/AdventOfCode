@@ -199,21 +199,22 @@ std::size_t TraverseAndSum(Directory* directory) {
     return sum;
 }
 
-std::size_t SmallestLargeEnoughDirectoryToDelete(FileSystem* file_system, const std::size_t space_to_free) {
-    assert(file_system != nullptr);
+std::size_t SmallestLargeEnoughDirectoryToDelete(Directory* dir, const std::size_t space_to_free) {
+    assert(dir != nullptr);
 
-    std::vector<std::size_t> directories_sorted_by_size;
-    directories_sorted_by_size.resize(file_system->directories_.size() + 1);
+    // Traverse subdirectories, and filter directories whose size (recursive size, that is) is not large enough
+    auto dir_sizes_greater_than_target = dir->sub_directories_ |
+            std::views::transform([](const std::pair<std::string, Directory*>& directory) { return directory.second; }) |
+            std::views::transform([&space_to_free](Directory* current) { return SmallestLargeEnoughDirectoryToDelete(current, space_to_free); }) |
+            std::views::filter([&space_to_free](const std::size_t dir_recursive_size) { return dir_recursive_size >= space_to_free; });
 
-    directories_sorted_by_size.push_back(file_system->root_dir_->GetRecursiveSize());
-
-    for (Directory* dir : file_system->directories_) {
-        directories_sorted_by_size.push_back(dir->GetRecursiveSize());
+    // If none of the subdirectories' is large enough, just return the size of the current directory.
+    if (dir_sizes_greater_than_target.empty()) {
+        return dir->GetRecursiveSize();
     }
 
-    std::sort(directories_sorted_by_size.begin(), directories_sorted_by_size.end());
-
-    return *std::lower_bound(directories_sorted_by_size.cbegin(), directories_sorted_by_size.cend(), space_to_free);
+    // Return smallest subdirectory that is large enough
+    return std::ranges::min(dir_sizes_greater_than_target);
 }
 
 int ParseAndRun(const std::string& path) {
@@ -238,7 +239,7 @@ int ParseAndRun(const std::string& path) {
     else {
         assert(unused_space < size_required_for_update);
         const std::size_t space_to_free = size_required_for_update - unused_space;
-        std::cout << SmallestLargeEnoughDirectoryToDelete(fs, space_to_free) << std::endl;
+        std::cout << SmallestLargeEnoughDirectoryToDelete(fs->root_dir_, space_to_free) << std::endl;
     }
 
     delete fs;// Delete our file system, could use smart pointers to avoid this crap
@@ -279,7 +280,7 @@ $ ls
     const std::size_t used = file_system->root_dir_->GetRecursiveSize();
     if (70000000 - used < 30000000) {
         const std::size_t goal = 30000000 - (70000000 - used);
-        assert(SmallestLargeEnoughDirectoryToDelete(file_system, goal) == 24933642);
+        assert(SmallestLargeEnoughDirectoryToDelete(file_system->root_dir_, goal) == 24933642);
     }
 
     return 0;
