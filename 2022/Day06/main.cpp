@@ -6,7 +6,7 @@
 #include <cassert>
 #include <unordered_map>
 
- uint32_t GetNumberOfCharactersForFirstMarker(const std::string& input, const std::size_t marker = 4) {
+ std::size_t GetNumberOfCharactersForFirstMarker(const std::string& input, const std::size_t marker = 4) {
     const std::size_t data_len = input.length();
 
     std::unordered_map<char, uint32_t> char_freq;
@@ -51,7 +51,7 @@ int ParseAndRun(const std::string& path) {
     return 0;
 }
 
-uint32_t Test() {
+int Test() {
     std::string t1 = "bvwbjplbgvbhsrlpgdmjqwftvncz"; // 5
     assert(GetNumberOfCharactersForFirstMarker(t1) == 5);
     assert(GetNumberOfCharactersForFirstMarker(t1, 14) == 23);
@@ -64,6 +64,7 @@ uint32_t Test() {
     std::string t4 = "zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw"; // 11
     assert(GetNumberOfCharactersForFirstMarker(t4) == 11);
     assert(GetNumberOfCharactersForFirstMarker(t4, 14) == 26);
+
     return 0;
 }
 
