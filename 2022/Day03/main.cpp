@@ -1,10 +1,11 @@
 #include <fstream>
-#include <vector>
-#include <algorithm>
+#include <iomanip>
 #include <iostream>
+#include <vector>
+#include <cassert>
+#include <algorithm>
 #include <ranges>
 #include <numeric>
-#include <cassert>
 #include <unordered_set>
 
 constexpr int GetPrioritySum(const std::vector<std::string>& input) {
@@ -63,7 +64,7 @@ constexpr int GetPrioritySumTriplets(const std::vector<std::string>& input) {
         std::vector<char> out;
         std::ranges::set_intersection(input_copy[i], input_copy[i + 1], std::back_inserter(out));
 
-        assert(out.size() > 0);
+        assert(!out.empty());
 
         // Now get the common elements of out and the last (third) rucksack
         std::vector<char> res;
@@ -87,13 +88,29 @@ constexpr int GetPrioritySumTriplets(const std::vector<std::string>& input) {
     return priority_score_sum;
 }
 
-int main() {
-    std::fstream input_file("input.txt");
+
+int Test() {
+    std::vector<std::string> test_data{
+            "vJrwpWtwJgWrhcsFMMfFFhFp",
+            "jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL",
+            "PmmdzqPrVvPwwTWBwg",
+            "wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn",
+            "ttgJtRGJQctTZtZT",
+            "CrZsJsPPZsGzwwsLwLmpwMDw",
+    };
+    assert(GetPrioritySum(test_data) == 157);
+    assert(GetPrioritySumTriplets(test_data) == 70);
+
+    return 0;
+}
+
+int ParseAndRun(const std::string& path) {
+    std::fstream input_file(path);
 
     std::vector<std::string> input;
 
     if (!input_file.is_open()) {
-        //std::cerr << "Failed to open " << std::quoted(path) << '\n';
+        std::cerr << "Failed to open " << std::quoted(path) << '\n';
         return 1;
     }
 
@@ -106,4 +123,12 @@ int main() {
     std::cout << GetPrioritySumTriplets(input) << std::endl;
 
     return 0;
+}
+
+int main(int argc, char** argv) {
+    if (argc == 1) {
+        return Test();
+    }
+
+    return ParseAndRun(argv[1]);
 }
