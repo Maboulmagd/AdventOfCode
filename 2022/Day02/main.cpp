@@ -1,8 +1,11 @@
+#include <string>
 #include <fstream>
+#include <iomanip>
+#include <iostream>
 #include <vector>
+#include <cassert>
 #include <utility>
 #include <algorithm>
-#include <iostream>
 #include <ranges>
 #include <numeric>
 
@@ -50,13 +53,25 @@ constexpr int FollowChoiceGuide(const std::vector<std::pair<char,char>>& strateg
     return std::reduce(scores.begin(), scores.end());
 }
 
-int main() {
-    std::fstream input_file("input.txt");
+int Test() {
+    std::vector<std::pair<char, char>> test_data{
+            {'A','Y'},
+            {'B','X'},
+            {'C','Z'}
+    };
+    assert(FollowStrategyGuide(test_data) == 15);
+    assert(FollowChoiceGuide(test_data) == 12);
+
+    return 0;
+}
+
+int ParseAndRun(const std::string& path) {
+    std::fstream input_file(path);
 
     std::vector<std::pair<char, char>> input;
 
     if (!input_file.is_open()) {
-        //std::cerr << "Failed to open " << std::quoted(path) << '\n';
+        std::cerr << "Failed to open " << std::quoted(path) << '\n';
         return 1;
     }
 
@@ -69,4 +84,12 @@ int main() {
     std::cout << FollowChoiceGuide(input) << std::endl;
 
     return 0;
+}
+
+int main(int argc, char** argv) {
+    if (argc == 1) {
+        return Test();
+    }
+
+    return ParseAndRun(argv[1]);
 }
