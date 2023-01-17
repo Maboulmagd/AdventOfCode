@@ -2,7 +2,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "FileSystem.h"
+#include "file_system.h"
 
 using namespace AOC2022Day07FileSystem;
 using namespace AOC2022Day07Directory;
@@ -67,9 +67,9 @@ std::size_t TraverseAndSum(Directory* directory) {
 
     // Visit subdirectories and sum sizes
     auto directory_recursive_size = directory->sub_directories_ |
-            std::views::transform([](const std::pair<std::string, Directory*>& directory) { return directory.second; }) |
-            std::views::transform(TraverseAndSum) |
-            std::views::common;
+                                    std::views::transform([](const std::pair<std::string, Directory*>& directory) { return directory.second; }) |
+                                    std::views::transform(TraverseAndSum) |
+                                    std::views::common;
     std::size_t sum = std::reduce(directory_recursive_size.begin(), directory_recursive_size.end());
 
     // If this directory has a recursive size less than our size_offset, add it to sum
@@ -85,9 +85,9 @@ std::size_t SmallestLargeEnoughDirectoryToDelete(Directory* dir, const std::size
 
     // Traverse subdirectories, and filter directories whose size (recursive size, that is) is not large enough
     auto dir_sizes_greater_than_target = dir->sub_directories_ |
-            std::views::transform([](const std::pair<std::string, Directory*>& directory) { return directory.second; }) |
-            std::views::transform([&space_to_free](Directory* current) { return SmallestLargeEnoughDirectoryToDelete(current, space_to_free); }) |
-            std::views::filter([&space_to_free](const std::size_t dir_recursive_size) { return dir_recursive_size >= space_to_free; });
+                                         std::views::transform([](const std::pair<std::string, Directory*>& directory) { return directory.second; }) |
+                                         std::views::transform([&space_to_free](Directory* current) { return SmallestLargeEnoughDirectoryToDelete(current, space_to_free); }) |
+                                         std::views::filter([&space_to_free](const std::size_t dir_recursive_size) { return dir_recursive_size >= space_to_free; });
 
     // If none of the subdirectories' is large enough, just return the size of the current directory.
     if (dir_sizes_greater_than_target.empty()) {

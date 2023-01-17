@@ -1,10 +1,10 @@
-#ifndef AOC_2022_DAY07_FILESYSTEM_H
-#define AOC_2022_DAY07_FILESYSTEM_H
+#ifndef AOC_2022_DAY07_FILE_SYSTEM_H
+#define AOC_2022_DAY07_FILE_SYSTEM_H
 
 #include <vector>
 #include <algorithm>
 
-#include "Directory.h"
+#include "directory.h"
 
 namespace AOC2022Day07FileSystem {
     class FileSystem final {
@@ -23,4 +23,4 @@ namespace AOC2022Day07FileSystem {
     };
 }
 
-#endif //AOC_2022_DAY07_FILESYSTEM_H
+#endif //AOC_2022_DAY07_FILE_SYSTEM_H

@@ -6,7 +6,7 @@
 #include <numeric>
 #include <cassert>
 
-#include "File.h"
+#include "file.h"
 
 namespace AOC2022Day07Directory {
     class Directory final : public AOC2022Day07File::File {

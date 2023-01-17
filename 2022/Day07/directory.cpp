@@ -1,4 +1,4 @@
-#include "Directory.h"
+#include "directory.h"
 
 using namespace AOC2022Day07Directory;
 using namespace AOC2022Day07File;
