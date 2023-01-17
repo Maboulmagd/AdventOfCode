@@ -1,28 +1,18 @@
 #include <fstream>
-#include <vector>
-#include <algorithm>
-#include <iostream>
-#include <ranges>
-#include <numeric>
-#include <cassert>
-#include <utility>
 #include <iomanip>
-#include <stack>
+#include <vector>
+#include <utility>
+#include <cassert>
+#include <iostream>
+#include <algorithm>
+#include <ranges>
 #include <cmath>
 
-struct Procedure final {
-    int32_t num_crates;
-    int32_t from_stack;
-    int32_t to_stack;
+#include "procedure.h"
 
-    friend std::istream& operator>>(std::istream& input_stream, Procedure& procedure) {
-        std::string word;
-        input_stream >> word >> procedure.num_crates >> word >> procedure.from_stack >> word >> procedure.to_stack;
-        return input_stream;
-    }
-};
+using namespace AOC2022Day05Procedure;
 
-std::vector<std::vector<char>> ParseStackArrangements(std::fstream& input_file) {
+std::vector<std::vector<char>> ParseStackArrangements(std::istream& input_file) {
     std::vector<std::vector<char>> stacks;
     bool parsed = false;
 
@@ -99,7 +89,44 @@ std::string CrateMover9001(std::vector<std::vector<char>>& stacks, const std::ve
     return stacks_top;
 }
 
-int ParseAndRun(const std::string path) {
+int Test() {
+    std::stringstream s(R"(    [D]
+[N] [C]
+[Z] [M] [P]
+ 1   2   3
+
+move 1 from 2 to 1
+move 3 from 1 to 3
+move 2 from 2 to 1
+move 1 from 1 to 2)");
+
+    auto state = ParseStackArrangements(s);
+    assert(state.size() == 4);
+    auto l1 = {'Z', 'N'};
+    assert(std::ranges::equal(state[1], l1));
+    auto l2 = {'M', 'C', 'D'};
+    assert(std::ranges::equal(state[2], l2));
+    auto l3 = {'P'};
+    assert(std::ranges::equal(state[3], l3));
+
+    std::vector<Procedure> procedures;
+    std::ranges::copy(std::views::istream<Procedure>(s), std::back_inserter(procedures));
+    assert(procedures.size() == 4);
+    auto cmp = {
+            Procedure{1, 2, 1},
+            Procedure{3, 1, 3},
+            Procedure{2, 2, 1},
+            Procedure{1, 1, 2}};
+    assert(std::ranges::equal(procedures, cmp));
+
+    auto state_copy = state;
+    assert(CrateMover9000(state, procedures) == "CMZ");
+    assert(CrateMover9001(state_copy, procedures) == "MCD");
+
+    return 0;
+}
+
+int ParseAndRun(const std::string& path) {
     std::fstream input_file(path);
 
     if (!input_file.is_open()) {
@@ -124,7 +151,7 @@ int ParseAndRun(const std::string path) {
 
 int main(int argc, char** argv) {
     if (argc == 1) {
-        return 1;
+        return Test();
     }
 
     return ParseAndRun(argv[1]);
