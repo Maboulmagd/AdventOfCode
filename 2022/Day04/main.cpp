@@ -1,31 +1,15 @@
 #include <fstream>
-#include <vector>
-#include <algorithm>
-#include <iostream>
-#include <ranges>
-#include <numeric>
-#include <cassert>
-#include <utility>
 #include <iomanip>
+#include <iostream>
+#include <vector>
+#include <utility>
+#include <cassert>
+#include <algorithm>
+#include <ranges>
 
-struct Interval final {
-    int32_t min;
-    int32_t max;
+#include "interval.h"
 
-    bool Subsumes(const Interval& other) const {
-        return (min <= other.min) && (max >= other.max);
-    }
-
-    bool Overlaps(const Interval& other) const {
-        return Subsumes(other) || ((max >= other.min) && (max <= other.max)) || ((min <= other.max) && (min >= other.min));
-    }
-
-    friend std::istream& operator>>(std::istream& file_stream, Interval& interval) {
-        char delimiter;
-        file_stream >> interval.min >> delimiter >> interval.max;
-        return file_stream;
-    }
-};
+using namespace AOC2022Day04Interval;
 
 constexpr int32_t NumberOfPairsFullyContained(const std::vector<std::pair<Interval,Interval>>& interval_pairs) {
     return std::ranges::count_if(interval_pairs, [](const std::pair<Interval,Interval>& interval_pair){
@@ -39,12 +23,27 @@ constexpr int32_t NumberOfPairsOverlapping(const std::vector<std::pair<Interval,
     });
 }
 
-int main() {
+int Test() {
+    std::vector<std::pair<Interval,Interval>> test_data{
+            {{2,4},{6,8}},
+            {{2,3},{4,5}},
+            {{5,7},{7,9}},
+            {{2,8},{3,7}},
+            {{6,6},{4,6}},
+            {{2,6},{4,8}}
+    };
 
-    std::fstream input_file("input.txt");
+    assert(NumberOfPairsFullyContained(test_data) == 2);
+    assert(NumberOfPairsOverlapping(test_data) == 4);
+    return 0;
+}
+
+int ParseAndRun(const std::string& path) {
+
+    std::fstream input_file(path);
 
     if (!input_file.is_open()) {
-        //std::cerr << "Failed to open " << std::quoted(input_file) << "\n";
+        std::cerr << "Failed to open " << std::quoted(path) << "\n";
         return 1;
     }
 
@@ -55,11 +54,19 @@ int main() {
     Interval second;
 
     while (input_file >> first >> delimiter >> second) {
-        input.push_back(std::make_pair(first, second));
+        input.emplace_back(first, second);
     }
 
     std::cout << NumberOfPairsFullyContained(input) << std::endl;
     std::cout << NumberOfPairsOverlapping(input) << std::endl;
 
     return 0;
+}
+
+int main(int argc, char** argv) {
+    if (argc == 1) {
+        return Test();
+    }
+
+    return ParseAndRun(argv[1]);
 }
