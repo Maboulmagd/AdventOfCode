@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <vector>
 #include <cassert>
+#include <ranges>
 
 uint32_t GetNumberOfTreesVisibleFromOutsideGrid(const std::vector<std::string>& input_data) {
     const std::size_t rows = input_data.size();
@@ -56,12 +57,6 @@ uint32_t GetNumberOfTreesVisibleFromOutsideGrid(const std::vector<std::string>& 
         }
     }
 
-//    30373
-//    25512
-//    65332
-//    33549
-//    35390
-
     uint32_t visible_trees = (2 * (rows + cols)) - 4;// Count trees on edge as they are always visible from outside the grid
 
     row = 1;// Reuse row variable
@@ -84,6 +79,82 @@ uint32_t GetNumberOfTreesVisibleFromOutsideGrid(const std::vector<std::string>& 
     return visible_trees;
 }
 
+/*
+30373
+25512
+65332
+33549
+35390
+ */
+
+std::size_t GetBestScenicScore(const std::vector<std::string>& input_data) {
+    const std::size_t rows = input_data.size();
+    const std::size_t cols = input_data[0].size();
+
+    if (rows == 0 || cols == 0) { return 0; }
+    assert(rows > 0 && cols > 0);
+
+    std::vector<std::vector<std::size_t>> scores(rows, std::vector<std::size_t>(cols, 1));
+
+    for (auto r : std::views::iota(1uz, input_data.size() - 1)) {
+        // Left to right
+        std::vector<std::size_t> blocked(10, 0);// Last index where a tree of given height was seen
+        for (auto c : std::views::iota(1uz, input_data[r].size() - 1)) {
+            const std::size_t curr_tree_height = input_data[r][c] - '0';
+            scores[r][c] *= c - blocked[curr_tree_height];
+
+            // This tree blocks any tree of same height or shorter
+            for (auto i : std::views::iota(0uz, curr_tree_height + 1)) {
+                blocked[i] = c;
+            }
+        }
+
+        // Right to left
+        blocked = std::vector<std::size_t>(10, input_data.size() - 1);
+        for (auto c : std::views::iota(1uz, input_data[r].size() - 1) | std::views::reverse) {
+            const std::size_t curr_tree_height = input_data[r][c] - '0';
+            scores[r][c] *= blocked[curr_tree_height] - c;
+
+            // This tree blocks any tree of same height or shorter
+            for (auto i : std::views::iota(0uz, curr_tree_height + 1)) {
+                blocked[i] = c;
+            }
+        }
+    }
+
+    std::size_t best_score = 1;
+
+    // Same thing, but now from top to bottom
+    for (auto c : std::views::iota(1uz, input_data[0].size() - 1)) {
+        // Top to bottom
+        std::vector<std::size_t> blocked(10, 0);
+        for (auto r: std::views::iota(1uz, input_data.size())) {
+            const std::size_t curr_tree_height = input_data[r][c] - '0';
+            scores[r][c] *= r - blocked[curr_tree_height];
+
+            for (auto i: std::views::iota(0uz, curr_tree_height + 1)) {
+                blocked[i] = r;
+            }
+        }
+
+        // Bottom to top
+        blocked = std::vector<std::size_t>(10, input_data.size() - 1);
+        for (auto r: std::views::iota(1uz, input_data.size() - 1) | std::views::reverse) {
+            const std::size_t curr_tree_height = input_data[r][c] - '0';
+            scores[r][c] *= blocked[curr_tree_height] - r;
+
+            // Take max score
+            best_score = std::max(best_score, scores[r][c]);
+
+            for (auto i: std::views::iota(0uz, curr_tree_height + 1)) {
+                blocked[i] = r;
+            }
+        }
+    }
+
+    return best_score;
+}
+
 int ParseAndRun(const std::string& path) {
     std::fstream file_stream(path);
 
@@ -99,7 +170,7 @@ int ParseAndRun(const std::string& path) {
     }
 
     std::cout << GetNumberOfTreesVisibleFromOutsideGrid(input_data) << std::endl;
-    //std::cout << GetNumberOfTreesVisibleFromOutsideGrid(input_data) << std::endl;
+    std::cout << GetBestScenicScore(input_data) << std::endl;
 
     return 0;
 }
@@ -114,7 +185,7 @@ int Test() {
     };
 
     assert(GetNumberOfTreesVisibleFromOutsideGrid(data) == 21);
-    //assert(best_scenic_score(data) == 8);
+    assert(GetBestScenicScore(data) == 8);
 
     return 0;
 }
