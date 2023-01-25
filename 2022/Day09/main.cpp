@@ -39,56 +39,40 @@ void MoveTail(Position& tail, const Position& head) {
     const int32_t head_col = head.col;
 
     // If head is ever 2 steps directly up, down, left, or right from tail, move tail accordingly
-    if (head_row == tail_row - 2) {// head is 2 steps up
-        if (head_col == tail_col - 1) {
-            --tail.row;
+    if (head_row == tail_row - 2) {// tail is 2 steps below
+        --tail.row;
+        if (head_col == tail_col - 1 || head_col == tail_col - 2) {
             --tail.col;
         }
-        else if (head_col == tail_col + 1) {
-            --tail.row;
+        else if (head_col == tail_col + 1 || head_col == tail_col + 2) {// The second condition only applies to part two
             ++tail.col;
-        }
-        else {
-            --tail.row;
         }
     }
-    else if (head_row == tail_row + 2) {// head is 2 steps down
-        if (head_col == tail_col - 1) {
-            ++tail.row;
+    else if (head_row == tail_row + 2) {// tail is 2 steps above
+        ++tail.row;
+        if (head_col == tail_col - 1 || head_col == tail_col - 2) {
             --tail.col;
         }
-        else if (head_col == tail_col + 1) {
-            ++tail.row;
+        else if (head_col == tail_col + 1 || head_col == tail_col + 2) {// The second condition only applies to part two
             ++tail.col;
-        }
-        else {
-            ++tail.row;
         }
     }
     else if (head_col == tail_col + 2) {// head is 2 steps to the right
+        ++tail.col;
         if (head_row == tail_row - 1) {
             --tail.row;
-            ++tail.col;
         }
         else if (head_row == tail_row + 1) {
             ++tail.row;
-            ++tail.col;
-        }
-        else {
-            ++tail.col;
         }
     }
     else if (head_col == tail_col - 2) {// head is 2 steps to the left
+        --tail.col;
         if (head_row == tail_row - 1) {
             --tail.row;
-            --tail.col;
         }
         else if (head_row == tail_row + 1) {
             ++tail.row;
-            --tail.col;
-        }
-        else {
-            --tail.col;
         }
     }
 }
@@ -102,11 +86,34 @@ std::size_t UniquePositionsVisited(const std::vector<Motion>& motions) {
     tail_positions_visited.insert(tail);// Add tail's origin as a visited position
 
     const auto parse_motion = [&head, &tail, &tail_positions_visited](const Motion& motion) {
-        for (const std::weakly_incrementable auto step : std::views::iota(0uz, motion.steps_)) {
+        for ([[maybe_unused]] const std::weakly_incrementable auto step : std::views::iota(0uz, motion.steps_)) {
             MoveHead(head, motion.direction_);
             MoveTail(tail, head);
 
             tail_positions_visited.insert(tail);
+        }
+    };
+
+    std::ranges::for_each(motions, parse_motion);
+    return tail_positions_visited.size();
+}
+
+std::size_t UniquePositionsVisitedTenKnots(const std::vector<Motion>& motions) {
+    std::unordered_set<Position> tail_positions_visited;
+
+    std::vector<Position> knots(10, Position{0, 0});
+    assert(knots.size() == 10);
+
+    tail_positions_visited.insert(knots[9]);
+
+    const auto parse_motion = [&knots, &tail_positions_visited](const Motion& motion) {
+        for ([[maybe_unused]] const std::weakly_incrementable auto step : std::views::iota(0uz, motion.steps_)) {
+            MoveHead(knots[0], motion.direction_);
+            for (const std::weakly_incrementable auto i : std::views::iota(1uz, knots.size())) {
+                MoveTail(knots[i], knots[i-1]);
+            }
+
+            tail_positions_visited.insert(knots[9]);
         }
     };
 
@@ -127,7 +134,7 @@ int ParseAndRun(const std::string& path) {
     assert(!motions.empty());
 
     std::cout << UniquePositionsVisited(motions) << std::endl;
-    //std::cout << UniquePositionsVisited(motions) << std::endl;
+    std::cout << UniquePositionsVisitedTenKnots(motions) << std::endl;
 
     return 0;
 }
@@ -145,6 +152,19 @@ int Test() {
     };
 
     assert(UniquePositionsVisited(motions) == 13);
+
+    std::vector<Motion> motions_part_two {
+            { Direction::RIGHT, 5 },
+            { Direction::UP, 8 },
+            { Direction::LEFT, 8 },
+            { Direction::DOWN, 3 },
+            { Direction::RIGHT, 17 },
+            { Direction::DOWN, 10 },
+            { Direction::LEFT, 25 },
+            { Direction::UP, 20 },
+    };
+
+    assert(UniquePositionsVisitedTenKnots(motions_part_two) == 36);
 
     return 0;
 }
