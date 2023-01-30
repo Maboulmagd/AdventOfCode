@@ -1,3 +1,5 @@
+#include "cpu.h"
+
 #include <string>
 #include <fstream>
 #include <iostream>
@@ -7,45 +9,8 @@
 #include <ranges>
 #include <cassert>
 
-#include "cpu_instruction.h"
-
 using namespace AOC2022Day10CPUINSTRUCTION;
-
-int32_t SignalStrengthSum(const std::vector<CPUInstruction>& instructions, const std::vector<int32_t>& breakpoints) {
-    int32_t x_register = 1;
-    int32_t signal_strength = 0;
-    std::size_t cycle = 0uz;
-    std::size_t breakpoints_i = 0uz;
-
-    const auto parse_instructions = [&](const CPUInstruction& cpu_instruction) {
-        const Instruction instruction = cpu_instruction.instruction_;
-        switch (instruction) {
-            case Instruction::ADDX:
-                if (cycle + 2 >= breakpoints[breakpoints_i]) {
-                    signal_strength += x_register * breakpoints[breakpoints_i];
-                    ++breakpoints_i;
-                }
-                cycle += 2;
-                x_register += cpu_instruction.value_.value();
-                break;
-            case Instruction::NOOP:
-                if (cycle == breakpoints[breakpoints_i]) {
-                    signal_strength += x_register * breakpoints[breakpoints_i];
-                    ++breakpoints_i;
-                }
-                cycle += 1;
-                break;
-            default:
-                throw std::runtime_error("Cannot parse CPUInstruction, invalid instruction type");
-        }
-        if (breakpoints_i > breakpoints.size()) {// Early break
-            return;
-        }
-    };
-
-    std::ranges::for_each(instructions, parse_instructions);
-    return signal_strength;
-}
+using namespace AOC2022Day10CPU;
 
 int ParseAndRun(const std::string& path) {
     std::fstream file_stream(path);
@@ -61,8 +26,14 @@ int ParseAndRun(const std::string& path) {
 
     std::vector<int32_t> breakpoints = {20, 60, 100, 140, 180, 220};
 
-    std::cout << SignalStrengthSum(instructions, breakpoints) << std::endl;
-    //std::cout << SixSignalStrengthSum(instructions) << std::endl;
+    CPU* cpu = new CPU();
+
+    std::cout << cpu->RunProgram(instructions, breakpoints) << std::endl;
+    for (const auto& line : cpu->screen_) {
+        std::cout << line << "\n";
+    }
+
+    delete cpu;
 
     return 0;
 }
@@ -221,7 +192,12 @@ noop)");
 
     std::vector<int32_t> breakpoints = {20, 60, 100, 140, 180, 220};
 
-    assert(SignalStrengthSum(instructions, breakpoints) == 13140);
+    CPU cpu;
+
+    assert(cpu.RunProgram(instructions, breakpoints) == 13140);
+    for (const auto& line : cpu.screen_) {
+        std::cout << line << "\n";
+    }
 
     return 0;
 }
