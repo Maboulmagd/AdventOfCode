@@ -17,15 +17,15 @@ namespace AOC2022Day11Monkey {
     class Monkey final {
     public:
         uint32_t monkey_num_;
-        std::vector<uint32_t> items_and_worry_level_;
+        std::vector<int64_t> items_and_worry_level_;
         Operation operation_;
         bool operation_operand_is_old_ = false;
         Operation test_;
         uint32_t if_true_monkey_;
         uint32_t if_false_monkey_;
 
-        uint32_t InspectItem(const int item_index);
-        uint32_t TestItem(const int item_index);
+        int64_t InspectItem(const int64_t item);
+        uint32_t TestItem(const int64_t item);
 
         friend std::istream& operator>>(std::istream& stream, Monkey& monkey) {
             std::string line;
@@ -43,7 +43,7 @@ namespace AOC2022Day11Monkey {
             {
                 std::getline(stream, line);
                 std::stringstream ss(line.substr(18));
-                int item;
+                int64_t item;
                 while (ss >> item) {
                     //std::cout << "Extracted item: " << item << std::endl;
                     monkey.items_and_worry_level_.push_back(item);
@@ -98,10 +98,8 @@ namespace AOC2022Day11Monkey {
                 monkey.if_false_monkey_ = throw_to_monkey;
             }
 
-            // Read in empty new line (Monkey separator), if we are NOT at the last monkey
-            if (stream.peek() != EOF) {
-                std::getline(stream, line);
-            }
+            // Read in empty new line (Monkey separator)
+            std::getline(stream, line);
 
             return stream;
         }
