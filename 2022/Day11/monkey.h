@@ -7,6 +7,7 @@
 #include <sstream>
 #include <cassert>
 #include <iostream>
+#include <limits>
 
 namespace AOC2022Day11Monkey {
     struct Operation final {
@@ -98,7 +99,10 @@ namespace AOC2022Day11Monkey {
                 monkey.if_false_monkey_ = throw_to_monkey;
             }
 
-            // Read in empty new line (Monkey separator)
+            if (!stream) {
+                std::cerr << "File input stream failed 1 at Monkey number " << monkey.monkey_num_ << std::endl;
+            }
+
             std::getline(stream, line);
 
             return stream;
