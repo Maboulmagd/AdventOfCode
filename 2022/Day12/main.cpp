@@ -7,6 +7,7 @@
 #include <vector>
 #include <queue>
 #include <unordered_set>
+#include <cassert>
 
 using namespace AOC2022Day12HeightMap;
 
@@ -124,6 +125,17 @@ int ParseAndRun(const std::string& path) {
 }
 
 int Test() {
+    std::vector<std::string> height_map = {"Sabqponm", "abcryxxl", "accszExk", "acctuvwj", "abdefghi"};
+    std::vector<HeightMapPosition> starting_positions = {HeightMapPosition{'S', 0, 0, 0},
+                                                         HeightMapPosition{'a', 0, 1, 0},
+                                                         HeightMapPosition{'a', 1, 0, 0},
+                                                         HeightMapPosition{'a', 2, 0, 0},
+                                                         HeightMapPosition{'a', 3, 0, 0},
+                                                         HeightMapPosition{'a', 4, 0, 0}};
+
+    assert(ShortestStepsToTarget(height_map, starting_positions,HeightMapPosition{'E', 2, 5, 0}) == 31);
+    assert(ShortestStepsToTarget(height_map, starting_positions, HeightMapPosition{'E', 2, 5, 0}, true) == 29);
+
     return 0;
 }
 

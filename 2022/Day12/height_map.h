@@ -23,17 +23,7 @@ namespace AOC2022Day12HeightMap {
         HeightMapPosition Right() const {
             return HeightMapPosition{' ', x_, y_ + 1};
         }
-
-        friend auto operator<=>(const HeightMapPosition&, const HeightMapPosition&) = default;// Required for unordered_set hashing
     };
 }
-
-// Explicit template specialization here...std::hash<Position>...also applies to all non-specializations...no?
-// https://stackoverflow.com/questions/4872809/in-c-what-does-template-mean
-template<> struct std::hash<AOC2022Day12HeightMap::HeightMapPosition> {
-    std::size_t operator()(const AOC2022Day12HeightMap::HeightMapPosition& position) const {
-        return (53 + std::hash<int>{}(position.x_)) * 53 + std::hash<int>{}(position.y_);
-    }
-};
 
 #endif //AOC_2022_DAY12_HEIGHTMAP_H
