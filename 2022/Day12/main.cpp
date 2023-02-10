@@ -12,7 +12,7 @@ using namespace AOC2022Day12HeightMap;
 
 std::size_t ShortestStepsToTarget(const std::vector<std::string>& height_map, HeightMapPosition start, HeightMapPosition end) {
 
-    std::unordered_set<HeightMapPosition> visited;
+    std::vector<std::vector<int32_t>> visited(height_map.size(), std::vector<int32_t>(height_map[0].size(), INT32_MAX));
 
     const auto within_bounds = [&height_map](const HeightMapPosition& target_position) {
         // Check bounds first
@@ -23,31 +23,35 @@ std::size_t ShortestStepsToTarget(const std::vector<std::string>& height_map, He
 
     const auto elevation_ok = []
             (const HeightMapPosition& curr_position, const HeightMapPosition& target_position) {
-        if (curr_position.val_ == 'S') return true;
-        if (target_position.val_ == 'E') return true;
-        if (curr_position.val_ >= target_position.val_) return true;
+        if (curr_position.val_ >= target_position.val_) return true;// If our current position's value is >= target position's value, we are ok
         return curr_position.val_ + 1 == target_position.val_;// Only 1 more than current is acceptable
     };
 
     const auto valid_position = [&height_map, &visited, &elevation_ok]
             (const HeightMapPosition& curr_position, const HeightMapPosition& target_position) {
-        if (visited.contains(target_position)) return false;
-        if (!elevation_ok(curr_position, target_position)) return false;
+        if (target_position.num_steps_ >= visited[target_position.x_][target_position.y_]) return false;// Already have a shorter path
+        if (curr_position.val_ == 'S') {
+            return elevation_ok({'a', 0, 0}, target_position);// Can we hop from 'a' to target?
+        }
+        if (target_position.val_ == 'E') {
+            // Can we hop from curr_position to 'E', which has elevation 'z'?
+            return elevation_ok({height_map[curr_position.x_][curr_position.y_], 0, 0}, {'z', 0, 0});
+        }
+        if (!elevation_ok(curr_position, target_position)) return false;// Standard case
         return true;
     };
 
-    // BFS guarantees the shortest number of steps
+    // BFS guarantees the shortest number of steps, but we can revisit positions/cells from other routes that result in shorter distances
     std::queue<HeightMapPosition> q;
     q.push(start);
-    visited.insert(start);
+    visited[0][0] = 0;
 
     while (!q.empty()) {
         const HeightMapPosition p = q.front();
         q.pop();
 
         if (p.val_ == 'E') {
-            end.num_steps_ = p.num_steps_;
-            break;
+            continue;
         }
 
         // Try to go in 4 directions
@@ -56,22 +60,18 @@ std::size_t ShortestStepsToTarget(const std::vector<std::string>& height_map, He
             if (!within_bounds(dir)) continue;
             dir.val_ = height_map[dir.x_][dir.y_];
 
-            // Check if we can go in that direction (has not been previously visited, and valid)
-            if (!valid_position(p, dir)) continue;
-
             // Set the number of steps
             dir.num_steps_ = p.num_steps_ + 1;
 
+            // Check if we can go in that direction
+            if (!valid_position(p, dir)) continue;
+
             q.push(dir);
-            visited.insert(dir);
+            visited[dir.x_][dir.y_] = dir.num_steps_;
         }
     }
 
-    while (!q.empty()) {
-        q.pop();
-    }
-
-    return end.num_steps_;
+    return visited[end.x_][end.y_];
 }
 
 int ParseAndRun(const std::string& path) {

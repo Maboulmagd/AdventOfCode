@@ -32,7 +32,7 @@ namespace AOC2022Day12HeightMap {
 // https://stackoverflow.com/questions/4872809/in-c-what-does-template-mean
 template<> struct std::hash<AOC2022Day12HeightMap::HeightMapPosition> {
     std::size_t operator()(const AOC2022Day12HeightMap::HeightMapPosition& position) const {
-        return std::hash<int>{}(position.x_) ^ std::hash<int>{}(position.y_ << 1uz) ^ position.val_;
+        return (53 + std::hash<int>{}(position.x_)) * 53 + std::hash<int>{}(position.y_);
     }
 };
 
