@@ -10,7 +10,7 @@
 
 using namespace AOC2022Day12HeightMap;
 
-std::size_t ShortestStepsToTarget(const std::vector<std::string>& height_map, HeightMapPosition start, HeightMapPosition end) {
+std::size_t ShortestStepsToTarget(const std::vector<std::string>& height_map, std::vector<HeightMapPosition>& starts, HeightMapPosition end, bool multiple_sources = false) {
 
     std::vector<std::vector<int32_t>> visited(height_map.size(), std::vector<int32_t>(height_map[0].size(), INT32_MAX));
 
@@ -43,8 +43,20 @@ std::size_t ShortestStepsToTarget(const std::vector<std::string>& height_map, He
 
     // BFS guarantees the shortest number of steps, but we can revisit positions/cells from other routes that result in shorter distances
     std::queue<HeightMapPosition> q;
-    q.push(start);
-    visited[0][0] = 0;
+    if (multiple_sources) {
+        for (const auto& start : starts) {
+            q.push(start);
+            visited[start.x_][start.y_] = 0;
+        }
+    }
+    else {
+        for (const auto& start : starts) {
+            if (start.val_ == 'S') {
+                q.push(start);
+                visited[start.x_][start.y_] = 0;
+            }
+        }
+    }
 
     while (!q.empty()) {
         const HeightMapPosition p = q.front();
@@ -84,13 +96,17 @@ int ParseAndRun(const std::string& path) {
 
     std::vector<std::string> height_map;
     std::string line;
-    HeightMapPosition starting_pos{};
+    std::vector<HeightMapPosition> starting_positions;
     HeightMapPosition ending_pos{};
     int32_t row = 0;
+
     while (std::getline(file_stream, line)) {
         for (int32_t col = 0; col < line.size(); ++col) {
             if (line[col] == 'S') {
-                starting_pos = {line[col], row, col, 0};
+                starting_positions.emplace_back(HeightMapPosition{'S', row, col, 0});
+            }
+            else if (line[col] == 'a') {
+                starting_positions.emplace_back(HeightMapPosition{'a', row, col, 0});
             }
             else if (line[col] == 'E') {
                 ending_pos = {line[col], row, col, 0};
@@ -101,8 +117,8 @@ int ParseAndRun(const std::string& path) {
         height_map.push_back(line);
     }
 
-    std::cout << ShortestStepsToTarget(height_map, starting_pos, ending_pos) << std::endl;
-    //std::cout << ShortestStepsToTarget(height_map, starting_pos, ending_pos) << std::endl;
+    std::cout << ShortestStepsToTarget(height_map, starting_positions, ending_pos) << std::endl;
+    std::cout << ShortestStepsToTarget(height_map, starting_positions, ending_pos, true) << std::endl;
 
     return 0;
 }
