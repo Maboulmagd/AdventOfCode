@@ -6,6 +6,7 @@
 # Ignore all .vs files
 *.vs
 *.vscode
+CMakeSettings.json
 
 # Ignore the out directory
 *.out
