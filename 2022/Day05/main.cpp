@@ -1,3 +1,6 @@
+#include "procedure.h"
+
+#include <string>
 #include <fstream>
 #include <iomanip>
 #include <vector>
@@ -7,8 +10,6 @@
 #include <algorithm>
 #include <ranges>
 #include <cmath>
-
-#include "procedure.h"
 
 using namespace AOC2022Day05Procedure;
 
