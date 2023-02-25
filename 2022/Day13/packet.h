@@ -6,6 +6,7 @@
 #include <istream>
 #include <memory>
 #include <optional>
+#include <algorithm>
 
 namespace AOC2022Day13Packet {
     struct Token final {
@@ -94,6 +95,12 @@ namespace AOC2022Day13Packet {
     struct Packet final {
         std::vector<std::unique_ptr<Token>> tokens_;
         Token* root_ = nullptr;
+        
+        Packet() = default;
+        explicit Packet(const int32_t divider) {
+            root_ = NewListToken(nullptr);
+            NewIntegerToken(NewListToken(root_), divider);
+        }
 
         auto operator<=>(const Packet& packet) const {
             return *root_ <=> *packet.root_;
