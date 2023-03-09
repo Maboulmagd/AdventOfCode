@@ -8,8 +8,7 @@
 namespace AOC2022Day14CaveMap {
 
     class CaveMap {
-    private:
-
+    public:
         // Our cave boundaries
         int32_t min_row_;
         int32_t max_row_;
@@ -17,8 +16,8 @@ namespace AOC2022Day14CaveMap {
         int32_t max_col_;
 
         void UpdateBoundingBox(const int32_t row, const int32_t col);
+        void Reset();
 
-    public:
         std::vector<std::vector<char>> map_ = std::vector<std::vector<char>>(1'000, std::vector<char>(1'000, '.'));
 
         // We don't know the exact rows or columns of our cave, so we'll have to continuously update it as we read each scan

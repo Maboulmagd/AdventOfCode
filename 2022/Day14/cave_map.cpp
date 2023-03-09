@@ -48,4 +48,14 @@ namespace AOC2022Day14CaveMap {
         if (row <= max_row_ && (col >= min_col_ && col <= max_col_)) { return true; }
         return false;
     }
+
+    void CaveMap::Reset() {
+        for (auto r : std::views::iota(0, 1'000)) {
+            for (auto c : std::views::iota(0, 1'000)) {
+                if (map_[r][c] == 'O') {
+                    map_[r][c] = '.';
+                }
+            }
+        }
+    }
 } // AOC2022Day14CaveMap
