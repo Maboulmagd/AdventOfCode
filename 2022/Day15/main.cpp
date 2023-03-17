@@ -72,6 +72,22 @@ int64_t PositionsThatCannotContainBeacon(const std::vector<std::pair<Position, P
     });
 }
 
+// Takes 10 seconds or so to run, costly function
+int64_t TuningFrequency(const std::vector<std::pair<Position, Position>>& sensors, const int64_t min_y, const int64_t max_y) {
+    int64_t res = 0;
+
+    for (int64_t y : std::views::iota(min_y, max_y+1)) {
+        const std::vector<Interval> intervals = CoverageAtRow(sensors, y);
+
+        if (intervals.size() > 1) {// We have gap(s)
+            res = ((intervals[0].max + 1) * int64_t(4000000)) + y;// So to get x-coordinate, just grab first interval's max (intervals ARE x-coordinate ranges) and add 1
+            break;
+        }
+    }
+
+    return res;
+}
+
 int ParseAndRun(const std::string& path) {
     std::fstream file_stream(path);
 
@@ -88,7 +104,7 @@ int ParseAndRun(const std::string& path) {
     }
 
     std::cout << PositionsThatCannotContainBeacon(sensors, 2000000) << std::endl;
-    //std::cout << PositionsThatCannotContainBeacon(sensors, 2000000) << std::endl;
+    std::cout << TuningFrequency(sensors, 0, 4000000) << std::endl;
 
     return 0;
 }
@@ -118,7 +134,7 @@ Sensor at x=20, y=1: closest beacon is at x=15, y=3)"
     }
 
     assert(PositionsThatCannotContainBeacon(sensors, 10) == 26);
-    //assert(PositionsThatCannotContainBeacon(sensors, 10) == 26);
+    assert(TuningFrequency(sensors, 0, 20) == 56000011);
 
     return 0;
 }
